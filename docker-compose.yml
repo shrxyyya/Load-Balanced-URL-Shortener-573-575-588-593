@@ -1,14 +1,16 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   mysql:
     image: mysql:latest
     container_name: mysql-container
     environment:
-      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ROOT_PASSWORD: 'Padigeri@1234'  # Consider using a strong password in production
       MYSQL_DATABASE: url_shortener
     ports:
       - "3307:3306"
+    volumes:
+      - ./url_shortener_db_3307.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
@@ -25,5 +27,5 @@ services:
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=
+      - MYSQL_PASSWORD=Padigeri@1234
       - MYSQL_DATABASE=url_shortener

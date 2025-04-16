@@ -11,13 +11,14 @@ app = Flask(__name__)
 
 # Database configuration using environment variables for security
 # This allows us to use our database credentials in a .env file instead of hardcoding them in our script.
-# For docker, the host is set to 'mysql-container' which is the name of the MySQL container
+# For docker, the host is set to 'mysql' which is the name of the MySQL container
 # For local development, you can set it to 'localhost' or the appropriate host for your MySQL server.
 db_config = {
-    'host': os.getenv('MYSQL_HOST', 'mysql-container'),
+    'host': os.getenv('MYSQL_HOST', 'mysql-service'),
     'user': os.getenv('MYSQL_USER', 'root'),
-    'password': os.getenv('MYSQL_PASSWORD', ''),
+    'password': os.getenv('MYSQL_PASSWORD', 'Padigeri@1234'),
     'database': os.getenv('MYSQL_DATABASE', 'url_shortener'),
+    'port': int(os.getenv('MYSQL_PORT', '3307')),  # Using environment variable for port
     'auth_plugin': 'mysql_native_password'
 }
 

@@ -39,18 +39,3 @@ services:
 
 
 # it is necessary to create and run mysql as a docker container as containers can only communicate with other services via containers
-
-
-
-RUNNING MYSQL:
-# Preferrably => Create a separate server:
-  Hostname = 127.0.0.1
-  Port = 3307                          (this is because I already have a different server on port 3306)
-
-Then enter the server details wherever necessary.
-The server is not running by default. It runs when we run docker-compose.
-
-
-
-Future work:
-- Use docker volumes so as to be able to store data in mysql container  =>  even when application stops, data persists  =>  mainly used for data persistence

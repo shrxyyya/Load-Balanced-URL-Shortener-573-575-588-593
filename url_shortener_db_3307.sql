@@ -1,5 +1,3 @@
-CREATE DATABASE url_shortener;
-
 USE url_shortener;
 
 CREATE TABLE redirections (
@@ -7,6 +5,3 @@ CREATE TABLE redirections (
     long_url VARCHAR(1024) NOT NULL,
     short_url VARCHAR(20) UNIQUE DEFAULT NULL
 );
-
-SELECT * FROM redirections;
-DELETE FROM redirections
