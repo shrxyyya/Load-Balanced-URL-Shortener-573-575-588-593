@@ -1,0 +1,366 @@
+MySQL Deployment (mysql-deployment.yaml):
+Creates a single MySQL pod (replicas: 1 for data consistency)
+Uses persistent storage for data durability
+Mounts an init script from ConfigMap
+Exposes port 3306
+Uses secrets for sensitive data
+MySQL Service (mysql-deployment.yaml):
+Type: ClusterIP (internal access only)
+Allows other pods to connect to MySQL using mysql-service hostname
+Exposes port 3306
+MySQL PV and PVC (mysql-pv.yaml):
+PersistentVolume provides actual storage (1GB)
+PersistentVolumeClaim requests storage for MySQL
+Ensures data persists even if pod restarts
+
+MySQL ConfigMap (mysql-configmap.yaml):
+Contains initialization SQL script
+Creates necessary table on first startup
+MySQL Secret (mysql-secret.yaml):
+Stores MySQL root password securely
+Base64 encoded for Kubernetes requirements
+URL Shortener Deployment (urlshortener-deployment.yaml):
+Runs 3 replicas for high availability
+Uses your Docker image
+Configures environment variables to connect to MySQL
+Exposes port 5000
+
+URL Shortener Service (urlshortener-deployment.yaml):
+Type: LoadBalancer (external access)
+Maps port 80 to container port 5000
+Provides load balancing across the 3 replicas
+To deploy these manifests:
+First, make sure your Docker image is built and available:
+
+docker build -t urlshortener:latest .
+
+Apply the Kubernetes manifests in order:
+kubectl apply -f k8s/mysql-secret.yaml
+kubectl apply -f k8s/mysql-pv.yaml
+kubectl apply -f k8s/mysql-configmap.yaml
+kubectl apply -f k8s/mysql-deployment.yaml
+kubectl apply -f k8s/urlshortener-deployment.yaml
+
+Verify the deployment:
+kubectl get pods
+kubectl get services
+
+kubectl get pods -w
+output:
+NAME                                     
+  READY   STATUS    RESTARTS   AGE       
+mysql-deployment-d7d54c4bc-rd8hs         
+  1/1     Running   0          12s       
+urlshortener-deployment-598459fc9d-fh49k   1/1     Running   0          6s        
+urlshortener-deployment-598459fc9d-x2xj8   1/1     Running   0          6s        
+urlshortener-deployment-598459fc9d-zs8xb   1/1     Running   0          6s    
+
+To verify the service is working, you can:
+Get the service URL:
+
+minikube service urlshortener-service --url
+
+
+
+task 3 and 4
+# Make the test script executable
+chmod +x test_api.sh
+
+# Apply the new ConfigMap
+kubectl apply -f k8s/urlshortener-config.yaml
+
+# Update the deployment
+kubectl apply -f k8s/urlshortener-deployment.yaml
+
+# Run the test script
+./test_api.sh
+
+eg output and explanation:
+
+1.URL Shortening Test Results:
+Request 1:
+Original URL: https://example.com/1
+Shortened URL: http://127.0.0.1/ed6l8w
+-------------------
+Testing redirection:
+Location: https://example.com/1
+
+✅ Each request successfully:
+Created a short URL (like ed6l8w)
+Verified redirection back to original URL
+
+2.Load Balancing Evidence:
+We can see requests distributed across 3 pods:
+Pod urlshortener-deployment-97d55f4cf-8z4k6 handled 10 requests
+Pod urlshortener-deployment-97d55f4cf-sm8mk handled 7 requests
+Pod urlshortener-deployment-97d55f4cf-zc9km handled 4 requests
+
+
+✅ This proves load balancing is working as:
+All 3 pods are active
+Requests are distributed across pods
+Each pod handles different requests
+
+3.Individual Pod Logs:
+Logs from pod urlshortener-deployment-97d55f4cf-8z4k6:
+* Running on http://127.0.0.1:5000
+* Running on http://10.244.0.33:5000
+
+Each pod shows:
+Flask server running
+Handling POST requests for URL creation
+Handling HEAD requests for redirections
+200 status codes for successful operations
+302 status codes for redirections
+
+5.Test Script Performance
+uccessfully created 10 unique short URLs
+Tested redirection for each URL
+Demonstrated load balancing across pods
+Only minor issue: kill: (53896) - No such process (non-critical cleanup error)
+
+The output shows that your Kubernetes deployment is working correctly with:
+✅ Multiple instances running
+✅ Load balancing working
+✅ URL shortening functioning
+✅ Redirections working
+✅ All pods healthy and responding
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+initial setup:
+   # Start Minikube
+   minikube start --driver=docker
+   
+   # Verify it's running
+   minikube status
+
+Build and Deploy:
+
+   # Point to Minikube's Docker
+   eval $(minikube docker-env)
+   
+   # Build image
+   docker build -t urlshortener:latest .
+   
+   # Apply Kubernetes configs
+   kubectl apply -f k8s/mysql-secret.yaml
+   kubectl apply -f k8s/mysql-pv.yaml
+   kubectl apply -f k8s/mysql-configmap.yaml
+   kubectl apply -f k8s/urlshortener-config.yaml
+   kubectl apply -f k8s/mysql-deployment.yaml
+   kubectl apply -f k8s/urlshortener-deployment.yaml
+
+
+Access the Application:
+   # Terminal 1: Start tunnel
+   minikube tunnel
+   
+   # Terminal 2: Get service URL
+   kubectl get service urlshortener-service
+
+
+Test the Application:
+
+   chmod +x test_api.sh
+   ./test_api.sh
+
+----------------------------------------------------------------------------------------------------------------
+
+
+not so good readme 👀
+
+# URL Shortener with Kubernetes
+
+A URL shortening service built with Flask and MySQL, deployed on Kubernetes.
+
+## Prerequisites
+
+1. Install the following tools:
+   - Docker Desktop
+   - Minikube
+   - kubectl
+   - Python 3.x (for local development)
+
+### Windows Installation
+powershell
+# Install Chocolatey (Windows package manager)
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# Install required tools
+choco install docker-desktop
+choco install minikube
+choco install kubernetes-cli
+
+
+### Linux/WSL Installation
+bash
+# Install Docker
+sudo apt-get update
+sudo apt-get install docker.io
+
+# Install Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+# Install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+
+## Project Setup
+
+1. Clone the repository:
+bash
+git clone <repository-url>
+cd CC-URLShortener
+
+
+2. Start Minikube:
+bash
+# Start Minikube with Docker driver
+minikube start --driver=docker
+
+# Verify Minikube is running
+minikube status
+
+
+3. Build and deploy the application:
+bash
+# Point shell to minikube's docker-daemon
+eval $(minikube docker-env)
+
+# Build the Docker image
+docker build -t urlshortener:latest .
+
+# Apply Kubernetes configurations
+kubectl apply -f k8s/mysql-secret.yaml
+kubectl apply -f k8s/mysql-pv.yaml
+kubectl apply -f k8s/mysql-configmap.yaml
+kubectl apply -f k8s/urlshortener-config.yaml
+kubectl apply -f k8s/mysql-deployment.yaml
+kubectl apply -f k8s/urlshortener-deployment.yaml
+
+# Verify all pods are running
+kubectl get pods -w
+
+
+4. Access the application:
+bash
+# Start minikube tunnel (keep this terminal open)
+minikube tunnel
+
+# In a new terminal, get the service URL
+kubectl get service urlshortener-service
+
+
+The application will be available at http://<EXTERNAL-IP> shown in the service output.
+
+## Testing the Application
+
+1. Make the test script executable:
+bash
+chmod +x test_api.sh
+
+
+2. Run the test script:
+bash
+./test_api.sh
+
+
+This will:
+- Create 10 shortened URLs
+- Test redirections
+- Show load balancing across pods
+
+## Project Structure
+
+
+CC-URLShortener/
+├── k8s/                    # Kubernetes configuration files
+│   ├── mysql-configmap.yaml
+│   ├── mysql-deployment.yaml
+│   ├── mysql-pv.yaml
+│   ├── mysql-secret.yaml
+│   ├── urlshortener-config.yaml
+│   └── urlshortener-deployment.yaml
+├── templates/              # Flask HTML templates
+│   ├── index.html
+│   └── result.html
+├── Dockerfile             # Docker configuration
+├── main.py               # Main application code
+├── requirements.txt      # Python dependencies
+├── test_api.sh          # Testing script
+└── README.md            # This file
+
+
+## Troubleshooting
+
+1. If pods are not starting:
+bash
+kubectl describe pods
+
+
+2. If the service is not accessible:
+bash
+# Check service status
+kubectl get services
+
+# Check service endpoints
+kubectl get endpoints urlshortener-service
+
+
+3. To view application logs:
+bash
+# View URL shortener logs
+kubectl logs -l app=urlshortener
+
+# View MySQL logs
+kubectl logs -l app=mysql
+
+
+4. To restart deployments:
+bash
+kubectl rollout restart deployment urlshortener-deployment
+kubectl rollout restart deployment mysql-deployment
+
+
+## Cleanup
+
+To stop and clean up the project:
+
+bash
+# Delete all resources
+kubectl delete -f k8s/
+
+# Stop minikube
+minikube stop
+
+# Optional: Delete minikube cluster
+minikube delete
+
+
+## Environment Variables
+
+The application uses the following environment variables (configured in ConfigMaps and Secrets):
+
+- MYSQL_HOST: MySQL service hostname
+- MYSQL_PORT: MySQL port (default: 3306)
+- MYSQL_USER: MySQL username
+- MYSQL_PASSWORD: MySQL password (in secret)
+- MYSQL_DATABASE: Database name
+- FLASK_ENV: Flask environment
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+
+
+
+
+
