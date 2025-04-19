@@ -20,6 +20,13 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
         envFrom:
         - configMapRef:
             name: urlshortener-config
@@ -27,7 +34,7 @@ spec:
         - name: MYSQL_HOST
           value: mysql-service  # Points to the MySQL ClusterIP Service
         - name: MYSQL_PORT
-          value: "3306"  # Changed from 3307 to 3306
+          value: "3306"
         - name: MYSQL_USER
           value: root
         - name: MYSQL_PASSWORD

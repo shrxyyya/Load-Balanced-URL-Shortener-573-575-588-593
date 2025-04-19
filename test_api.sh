@@ -17,7 +17,7 @@ echo "Service URL: $SERVICE_URL"
 
 # Function to send requests
 send_requests() {
-    for i in {1..10}; do
+    for i in {1..30}; do
         echo "Request $i:"
         # Send POST request to create short URL with proper form data
         response=$(curl -s -X POST \
