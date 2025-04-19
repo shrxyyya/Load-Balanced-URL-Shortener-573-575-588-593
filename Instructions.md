@@ -62,12 +62,17 @@ kubectl get service urlshortener-service
 
 Run API tests:
 ```bash
+chmod +x test_api.sh
 ./test_api.sh
 ```
 
 Run stress tests:
 ```bash
-./test_api.sh stress
+chmod +x basic_stress_test.sh
+./basic_stress_test.sh
+
+chmod +x adv_stress_test.sh
+./adv_stress_test.sh
 ```
 
 #### Terminal 4: Monitor CPU Usage and HPA
