@@ -55,7 +55,7 @@ Runs MySQL in the background (-d).
 
 ### **Step 5: Run Database Migration**
 ```sh
-docker exec -i mysql-container mysql -u root -p "<mysql password>" url_shortener < url_shortener_db_3307.sql
+docker exec -i mysql-container mysql -u root -p "<mysql password>" url_shortener < url_shortener_db.sql
 ```
 Executes the url_shortener_db.sql file to create the necessary database table
 
