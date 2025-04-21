@@ -68,6 +68,12 @@ chmod +x test_api.sh
 
 Run stress tests:
 ```bash
+# Enable it with proper configuration
+minikube addons enable metrics-server
+
+# Verify it's running
+kubectl get pods -n kube-system | grep metrics-server
+
 chmod +x basic_stress_test.sh
 ./basic_stress_test.sh
 
